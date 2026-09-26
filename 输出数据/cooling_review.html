@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>冷静池节点筛选 - 火枭</title>
+<script src="https://cdn.jsdelivr.net/npm/heic2any@0.0.4/dist/heic2any.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;background:#f5f5f7;height:100vh;display:flex;overflow:hidden;--flash-color:#9f0304}
@@ -30,8 +31,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
 @keyframes vidFlash{0%{background:var(--flash-color);color:#fff}100%{background:#fff;color:var(--flash-color)}}
 .card-area{flex:1;display:flex;align-items:center;justify-content:center;padding:20px 6px 20px 20px}
 .node-card{width:100%;max-width:900px;background:#fff;border-radius:24px;padding:24px;display:flex;gap:24px;align-items:stretch;height:calc(100vh - 40px)}
-.fade{animation:fadeIn 1s ease}
-@keyframes fadeIn{0%{opacity:0}100%{opacity:1}}
+.btn-out{opacity:.35;transition:opacity .35s ease}
 .grid-9{flex:1.6;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:8px;height:100%}
 .video-thumb{height:100%;background:#eee;border-radius:8px;position:relative;overflow:hidden;cursor:pointer}
 .video-thumb img{width:100%;height:100%;object-fit:cover;display:block}
@@ -76,7 +76,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;backg
 </div>
 <div class="vid-page-box" id="vid-page-box"><span class="vid-page-num" id="vid-page-num">1</span><span class="vid-page-total" id="vid-page-total">/ 1</span></div>
 <div class="card-area" id="card-area">
-<div class="node-card fade" id="node-card">
+<div class="node-card" id="node-card">
 <div class="grid-9" id="grid"></div>
 <div class="side-panel">
 <div class="user-info"><div class="avatar" id="avatar">?</div><h2 id="nickname" style="cursor:pointer" title="点击进入抖音官方主页"></h2><p id="user-meta">冷静池节点 · 喜欢列表公开</p></div>
@@ -125,8 +125,79 @@ function loadData(){
   document.getElementById('total').innerText = nodes.length;
   document.getElementById('pending').innerText = nodes.length;
   render();
+  preconvertAvatars();
 }
 let vidx=0;                 // 当前节点内视频页（每页9条）
+// ===== 前端 heic 预转换 + 封面预加载 =====
+const avatarCache=new Map();
+const coverCache=new Map();
+async function mediaUrl(rawUrl,cacheMap,key){
+  if(cacheMap.has(key))return cacheMap.get(key);
+  const isHeic=/\.heic(\?|$)/i.test(rawUrl);
+  if(!isHeic){cacheMap.set(key,rawUrl);return rawUrl;}
+  cacheMap.set(key,null);
+  try{
+    if(typeof heic2any!=='function')throw new Error('heic2any not loaded');
+    const r=await fetch(rawUrl);
+    if(!r.ok)throw new Error('fetch '+r.status);
+    const blob=await r.blob();
+    const jpg=await heic2any({blob:blob,toType:'image/jpeg',quality:0.85});
+    const u=URL.createObjectURL(jpg);
+    cacheMap.set(key,u);
+    return u;
+  }catch(e){
+    cacheMap.set(key,rawUrl);
+    return rawUrl;
+  }
+}
+async function preconvertAvatars(){
+  for(const n of nodes){
+    const p=n.profile;
+    if(!p||!p.avatar)continue;
+    await mediaUrl(p.avatar,avatarCache,n.sec_uid);
+    if(nodes[idx]===n)renderAvatar(n);
+  }
+}
+function preloadCovers(){
+  const n=nodes[idx];if(!n)return;
+  const sets=[];
+  [-1,1].forEach(d=>{
+    const list=n.likes||[];
+    sets.push(...list.slice((vidx+d)*9,(vidx+d)*9+9));
+  });
+  [-1,1].forEach(d=>{
+    const nn=nodes[idx+d];
+    if(nn)sets.push(...(nn.likes||[]).slice(0,9));
+  });
+  sets.forEach(v=>{
+    if(!v||!v.cover)return;
+    if(/\.heic(\?|$)/i.test(v.cover)){
+      mediaUrl(v.cover,coverCache,v.aweme_id).then(u=>{
+        const img=document.querySelector('img[data-aid="'+v.aweme_id+'"]');
+        if(img&&u)img.src=u;
+      });
+    }else{
+      if(!coverCache.has(v.aweme_id)){const im=new Image();im.src=v.cover;}
+      coverCache.set(v.aweme_id,v.cover);
+    }
+  });
+}
+function renderAvatar(n){
+  const av=document.getElementById('avatar');
+  av.style.cursor='pointer';av.title='点击进入抖音官方主页';
+  av.onclick=()=>window.open(`https://www.douyin.com/user/${n.sec_uid}`,'_blank');
+  const cached=avatarCache.get(n.sec_uid);
+  av.innerHTML='';
+  if(cached){
+    av.style.background='none';av.style.padding='0';
+    const im=document.createElement('img');
+    im.src=cached;im.style.cssText='width:100%;height:100%;border-radius:50%;object-fit:cover;';
+    av.appendChild(im);
+  }else{
+    av.style.background='linear-gradient(135deg,#667eea,#764ba2)';av.style.padding='0';
+    av.innerHTML=(n.nickname||'?').trim()[0]||'?';
+  }
+}
 function videoPages(n){return Math.max(1,Math.ceil((n.likes||[]).length/9));}
 function videoPrev(){if(vidx<=0)return;vidx--;render();flashVidBox()}
 function videoNext(){if(vidx>=videoPages(nodes[idx])-1)return;vidx++;render();flashVidBox()}
@@ -141,16 +212,10 @@ function countStats(changed){
 
 function render(){
   if(!nodes.length) return;
-  const card=document.getElementById('node-card');
-  card.classList.remove('fade');void card.offsetWidth;card.classList.add('fade');
   const n=nodes[idx];
   document.getElementById('nickname').innerText=n.nickname;
 document.getElementById('nickname').onclick=()=>window.open(`https://www.douyin.com/user/${n.sec_uid}`,'_blank');
-  const av=document.getElementById('avatar');
-av.style.cursor='pointer';av.title='点击进入抖音官方主页';
-av.onclick=()=>window.open(`https://www.douyin.com/user/${n.sec_uid}`,'_blank');
-if(n.profile && n.profile.avatar){av.style.background='none';av.style.padding='0';av.innerHTML=`<img src="${n.profile.avatar}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;" onerror="this.onerror=null;this.style.display='none';av.style.background='linear-gradient(135deg,#667eea,#764ba2)';av.innerHTML=((n.nickname||'?').trim()[0]||'?')">`;}
-else{av.style.background='linear-gradient(135deg,#667eea,#764ba2)';av.style.padding='0';av.innerHTML=(n.nickname||'?').trim()[0]||'?';}
+  renderAvatar(n);
   const grid=document.getElementById('grid');
   grid.innerHTML='';
   const totalPages=videoPages(n);
@@ -161,7 +226,8 @@ else{av.style.background='linear-gradient(135deg,#667eea,#764ba2)';av.style.padd
     const cell=document.createElement('div');
     cell.className='video-thumb';
     if(v && v.cover){
-      cell.innerHTML=`<img src="${v.cover}" loading="lazy" onerror="this.style.display='none'"><span class="like-badge">❤ ${fmtNum(v.digg||0)}</span>`;
+      const cs=coverCache.get(v.aweme_id);
+      cell.innerHTML=`<img src="${cs||v.cover}" data-aid="${v.aweme_id}" onerror="this.style.display='none'"><span class="like-badge">❤ ${fmtNum(v.digg||0)}</span>`;
       cell.onclick=()=>window.open(`https://www.douyin.com/video/${v.aweme_id}`,'_blank');
     }else{
       cell.innerHTML='<span class="like-badge">❤ 0</span>';
@@ -179,6 +245,8 @@ const _vp=videoPages(n);document.getElementById('vid-page-num').innerText=vidx+1
   document.getElementById('btn-pass').classList.toggle('selected-pass',d==='pass');
   document.getElementById('btn-block').classList.toggle('selected-block',d==='block');
   document.getElementById('btn-skip').classList.toggle('selected-skip',d==='skip');
+  ['btn-pass','btn-block','btn-skip'].forEach(id=>document.getElementById(id).classList.remove('btn-out'));
+  preloadCovers();
 }
 function leaveCurrent(){if(decisions[idx]===null){decisions[idx]='skip';countStats('skip')}}
 function flashArrow(dir){const b=document.getElementById(dir>0?'next-btn':'prev-btn');b.classList.remove('flash-red');void b.offsetWidth;b.classList.add('flash-red');setTimeout(()=>b.classList.remove('flash-red'),360)}
@@ -190,7 +258,9 @@ function decide(a){const prev=decisions[idx];decisions[idx]=a;countStats(prev===
 document.getElementById('btn-pass').classList.toggle('selected-pass',a==='pass');
 document.getElementById('btn-block').classList.toggle('selected-block',a==='block');
 document.getElementById('btn-skip').classList.toggle('selected-skip',a==='skip');
-setTimeout(()=>goTo(idx+1),177)}
+const _bm={pass:'btn-pass',block:'btn-block',skip:'btn-skip'};
+document.getElementById(_bm[a]).classList.add('btn-out');
+setTimeout(()=>goTo(idx+1),360)}
 async function submitAll(){
   leaveCurrent();countStats();
   const result=nodes.map((n,i)=>({sec_uid:n.sec_uid, decision:decisions[i]}));
