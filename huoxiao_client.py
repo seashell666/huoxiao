@@ -85,10 +85,12 @@ class GuestChannel:
         items = cache.interference_filter(items)
         return [HuoxiaoClient._norm(a) for a in items], False, "0", {"status": 0}
 
-    def get_likes(self, sec, count=20):
-        """游客通道拿喜欢列表（App端接口）"""
+    def get_likes(self, sec, count=20, max_pages=2, sleep_range=(1.2, 2.5)):
+        """游客通道拿喜欢列表（App端接口）
+        max_pages=2 → 翻2页约40条（与面板 A/F 翻页 5 页匹配）
+        """
         self._guard(f"guest:likes:{sec}")
-        items, meta = self.likes_app.fetch_all(sec, max_pages=1, sleep_range=None)
+        items, meta = self.likes_app.fetch_all(sec, max_pages=max_pages, sleep_range=sleep_range)
         if meta.get("closed"):
             return [], False, "0", {"status": 3002279, "closed": True}
         import cache

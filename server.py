@@ -14,6 +14,7 @@ import cache
 import config
 import huoxiao_client as hx
 import downloads
+import web_channel
 
 app = FastAPI(title="火枭采集服务", version="0.2.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -22,6 +23,7 @@ app.include_router(downloads.router)
 # 启动初始化
 cache.init()
 _guest = hx.GuestChannel()          # 游客通道单例（生产主力）
+_web = web_channel.WebChannel()     # Web 端通道单例（vault cookie + a_bogus，喜欢/收藏主通道）
 _auth = None                        # 登录通道懒加载（仅开发验真）
 
 
@@ -137,6 +139,17 @@ def panel_page():
     return PANEL_HTML.replace("__KEY__", config.API_KEY)
 
 
+@app.get("/cooling", response_class=HTMLResponse)
+def cooling_page():
+    """冷静池筛选面板（读取本地 cooling_review.html 最新版，用户固定用此 URL 打开）"""
+    try:
+        p = r"F:\D\20-火枭\服务\输出数据\cooling_review.html"
+        with open(p, "r", encoding="utf-8") as f:
+            return f.read()
+    except Exception as e:
+        return HTMLResponse(f"<h3>读取冷静池面板失败: {str(e)[:120]}</h3>", status_code=500)
+
+
 @app.get("/v1/panel/overview")
 def panel_overview(x_api_key: str = Header("")):
     _check_key(x_api_key)
@@ -224,22 +237,45 @@ def api_likes(sec_uid: str, cursor: int = 0, limit: int = 20, x_api_key: str = H
         if hit:
             cache.log_req("/v1/user/likes", sec_uid, 0, cached=True, ms=int((time.time() - t0) * 1000))
             return {"code": 0, "data": {"items": hit, "has_more": False, "cursor": "done"}, "meta": {"cached": True}}
-    auth = _get_auth()
-    if auth is None:
-        cache.log_req("/v1/user/likes", sec_uid, 401, ms=int((time.time() - t0) * 1000))
-        return {"code": 401, "data": None, "meta": {"msg": "登录通道未配置（likes 需要登录身份）"}}
     try:
-        items, more, cur, meta = auth.get_likes(sec_uid, cursor, limit)
-        code = 0 if meta.get("status") == 0 else meta.get("status", 500)
+        # Web 端通道优先（vault cookie + a_bogus，绕开 App 端 bd-ticket-guard 动态签名锁）
+        items, more, cur, meta = _web.get_likes(sec_uid, limit)
+        if meta.get("status") != 0:
+            raise RuntimeError(f"web:{meta.get('status')}:{meta.get('err', '')}")
+        if meta.get("closed"):
+            cache.node_cache_set(sec_uid, "likes", {"closed": True}, ttl=config.TTL_A)
+            cache.node_update(sec_uid, status="private", progress={"likes": "closed"})
+            cache.log_req("/v1/user/likes", sec_uid, 3002279, cached=False, ms=int((time.time() - t0) * 1000))
+            return {"code": 3002279, "data": None, "meta": {"msg": "喜欢未公开", "closed": True}}
+        code = 0
     except Exception as e:
-        cache.log_req("/v1/user/likes", sec_uid, 500, ms=int((time.time() - t0) * 1000))
-        return {"code": 500, "data": None, "meta": {"err": f"{type(e).__name__}:{str(e)[:80]}"}}
+        # Web 失败 → App 游客通道（次选）
+        try:
+            items, more, cur, meta = _guest.get_likes(sec_uid, limit)
+            if meta.get("closed"):
+                cache.node_cache_set(sec_uid, "likes", {"closed": True}, ttl=config.TTL_A)
+                cache.node_update(sec_uid, status="private", progress={"likes": "closed"})
+                cache.log_req("/v1/user/likes", sec_uid, 3002279, cached=False, ms=int((time.time() - t0) * 1000))
+                return {"code": 3002279, "data": None, "meta": {"msg": "喜欢未公开", "closed": True}}
+            code = 0
+        except Exception as e2:
+            # App 游客失败 → 主号兜底（开发验真期低频）
+            cache.log_req("/v1/user/likes", sec_uid, 500, cached=False, ms=int((time.time() - t0) * 1000))
+            auth = _get_auth()
+            if auth is None:
+                return {"code": 500, "data": None, "meta": {"err": f"web:{str(e)[:40]} guest:{type(e2).__name__}:{str(e2)[:40]}", "msg": "Web+游客通道失败且登录通道未配置"}}
+            try:
+                items, more, cur, meta = auth.get_likes(sec_uid, cursor, limit)
+                code = 0 if meta.get("status") == 0 else meta.get("status", 500)
+            except Exception as e3:
+                cache.log_req("/v1/user/likes", sec_uid, 500, ms=int((time.time() - t0) * 1000))
+                return {"code": 500, "data": None, "meta": {"err": f"{type(e3).__name__}:{str(e3)[:80]}"}}
     if code == 0:
-        cache.node_update(sec_uid, progress={"likes": f"{len(items)}/{limit}"})
+        cache.node_update(sec_uid, status="done", progress={"likes": f"{len(items)}/all"})
         if cursor == 0:
             cache.node_cache_set(sec_uid, "likes", items, ttl=config.TTL_A)
     cache.log_req("/v1/user/likes", sec_uid, code, cached=False, ms=int((time.time() - t0) * 1000))
-    return {"code": code, "data": {"items": items, "has_more": more, "cursor": cur}, "meta": {"cached": False}}
+    return {"code": code, "data": {"items": items, "has_more": False, "cursor": "done"}, "meta": {"cached": False}}
 
 
 @app.get("/v1/user/{sec_uid}/collects")
