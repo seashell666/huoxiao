@@ -1,0 +1,11 @@
+__pycache__/
+logs/
+tasks.json
+*.log
+
+输出数据/*.db
+输出数据/视频下载/
+输出数据/covers/
+输出数据/temp/
+输出数据/*.jpg
+输出数据/*.png

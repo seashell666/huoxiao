@@ -104,7 +104,6 @@ class ProfileClient:
 
 
 if __name__ == "__main__":
-    import json
     pc = ProfileClient(guest=True)
     for sec in sys.argv[1:] or ["MS4wLjABAAAAWMDSHY8f0C6DdNGkj7XJJvAda4BhoL4bfMOYrtVr2gw"]:
         p, m = pc.get_profile(sec)
