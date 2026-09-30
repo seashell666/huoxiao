@@ -1,0 +1,41 @@
+# === 数据库与大体积数据资产（本地保留，不入库）===
+输出数据/huoxiao_cache.db
+输出数据/视频下载/
+输出数据/temp/
+输出数据/covers/
+输出数据/app_db/
+输出数据/data/
+输出数据/main_account_data.json
+输出数据/手机截图/
+输出数据/operit*.jpg
+输出数据/operit_screen.png
+
+# === 参考开源项目（独立项目，不入库）===
+参考-DouYin_Spider/
+
+# === Syncthing / 环境残留 ===
+.stfolder/
+
+# === Python ===
+__pycache__/
+*.pyc
+*.log
+
+# === 散落工具/安装包（不属于火枭仓库，归 10-工具）===
+/ldplayerinst9.exe
+/uber-apk-signer.jar
+
+# === 面板/HTML 历史备份 ===
+*.bak
+*_bak
+*.afternoon_bak
+*.fixbak
+*.v6bak
+*.square_bak
+*.pre_fullbak
+*.pre_v4bak
+
+# === 整理/交接过程临时文件 ===
+_git_*.txt
+_inner_*.txt
+输出数据/favorites_ckpt.json

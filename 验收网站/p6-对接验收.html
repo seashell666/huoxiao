@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火枭 × LocalDouyin P6 对接验收</title>
+<style>
+  :root{
+    --bg:#f5f7fa; --card:#ffffff; --ink:#1a2333; --sub:#5b6b80;
+    --line:#e2e8f0; --brand:#e43e2f; --ok:#15803d; --warn:#b45309;
+    --accent:#2563eb; --chip:#f1f5f9;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{background:var(--bg); color:var(--ink); font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif; line-height:1.6; padding:24px}
+  .wrap{max-width:1080px; margin:0 auto}
+  header{display:flex; align-items:baseline; gap:16px; flex-wrap:wrap; margin-bottom:20px}
+  header h1{font-size:26px; font-weight:800; letter-spacing:.5px}
+  header h1 em{color:var(--brand); font-style:normal}
+  header .sub{color:var(--sub); font-size:13px}
+  .badge{display:inline-block; background:#dcfce7; color:var(--ok); font-size:12px; font-weight:700; padding:3px 10px; border-radius:20px; margin-left:8px}
+  .grid{display:grid; gap:16px}
+  .g4{grid-template-columns:repeat(4,1fr)}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:860px){.g4,.g2{grid-template-columns:1fr}}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:18px}
+  .card h3{font-size:15px; margin-bottom:10px; display:flex; align-items:center; gap:8px}
+  .card h3 .dot{width:8px; height:8px; border-radius:50%; display:inline-block}
+  .num{font-size:26px; font-weight:800; color:var(--ink)}
+  .lbl{font-size:12px; color:var(--sub); margin-top:2px}
+  .kpi .num{color:var(--accent)}
+  .kpi.ok .num{color:var(--ok)}
+  code{background:var(--chip); border-radius:6px; padding:1px 6px; font-family:Consolas,monospace; font-size:13px; color:#334155}
+  table{width:100%; border-collapse:collapse; margin-top:6px; table-layout:fixed}
+  th,td{text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); font-size:13px; vertical-align:top}
+  th{background:#f8fafc; font-weight:700; color:var(--sub); white-space:nowrap}
+  td{word-break:break-all}
+  tr:hover td{background:#f8fafc}
+  .flow{display:flex; align-items:stretch; gap:10px; flex-wrap:wrap; margin-top:8px}
+  .node{flex:1; min-width:180px; background:#f8fafc; border:1px solid var(--line); border-radius:10px; padding:14px}
+  .node .t{font-weight:700; font-size:14px}
+  .node .d{font-size:12px; color:var(--sub); margin-top:4px}
+  .node code{font-size:12px}
+  .arrow{align-self:center; font-size:22px; color:var(--brand); font-weight:700}
+  .ok{color:var(--ok); font-weight:700}
+  .warn{color:var(--warn); font-weight:700}
+  .tl{position:relative; margin:14px 0 4px; padding-left:22px}
+  .tl::before{content:""; position:absolute; left:7px; top:6px; bottom:6px; width:2px; background:var(--line)}
+  .tl .it{position:relative; padding:0 0 14px 10px}
+  .tl .it::before{content:""; position:absolute; left:-21px; top:6px; width:10px; height:10px; border-radius:50%; background:var(--accent); border:2px solid #fff; box-shadow:0 0 0 2px var(--accent)}
+  .tl .it.done::before{background:var(--ok); box-shadow:0 0 0 2px var(--ok)}
+  .tl .it.now::before{background:var(--brand); box-shadow:0 0 0 2px var(--brand)}
+  .tl .tm{font-size:12px; color:var(--sub)}
+  .tl .txt{font-size:13px}
+  .tl .txt b{font-weight:700}
+  .note{font-size:12px; color:var(--sub); background:#f8fafc; border-left:3px solid var(--accent); padding:8px 12px; border-radius:0 8px 8px 0; margin-top:8px}
+  .chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px}
+  .chip{background:var(--chip); border-radius:20px; padding:3px 12px; font-size:12px}
+  .chip b{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>火枭 <em>×</em> LocalDouyin — P6 对接验收</h1>
+  <span class="badge">全链路贯通 · 实测通过</span>
+  <div class="sub">火枭采集服务（192.168.0.105:8100）→ LocalDouyin 策展引擎（192.168.0.107）数据导入路由</div>
+</header>
+
+<div class="grid g4">
+  <div class="card kpi ok"><div class="num">200</div><div class="lbl">schedule 编排请求</div></div>
+  <div class="card kpi ok"><div class="num">2/2</div><div class="lbl">维度采集成功（visibility+collects）</div></div>
+  <div class="card kpi ok"><div class="num">9</div><div class="lbl">真实视频落库（含计数）</div></div>
+  <div class="card kpi ok"><div class="num">1</div><div class="lbl">同好节点落库（权重0.8）</div></div>
+</div>
+
+<div class="grid g2" style="margin-top:16px">
+  <div class="card">
+    <h3><span class="dot" style="background:var(--ok)"></span>新增路由（LocalDouyin 侧）</h3>
+    <table>
+      <tr><th style="width:30%">路由</th><th style="width:24%">方法</th><th>作用</th></tr>
+      <tr><td><code>/api/crawl/import</code></td><td>POST</td><td>接收火枭采集 JSON 落库（节点/可见性/收藏/喜欢/作品/关注/粉丝）</td></tr>
+      <tr><td><code>/api/crawl/schedule</code></td><td>POST</td><td>按节点+维度编排：请求火枭 → 自动落库（游客维度优先）</td></tr>
+      <tr><td><code>/api/crawl/status</code></td><td>GET</td><td>导入统计（同好/视频/关系数）</td></tr>
+    </table>
+    <div class="note">模块：<code>app/crawl_bridge.py</code>，已挂载进 <code>app/main.py</code>（FastAPI include_router）</div>
+  </div>
+
+  <div class="card">
+    <h3><span class="dot" style="background:var(--accent)"></span>全链路架构</h3>
+    <div class="flow">
+      <div class="node"><div class="t">LocalDouyin</div><div class="d">策展引擎<br><code>107:8000</code><br>POST /api/crawl/schedule</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="t">火枭</div><div class="d">采集服务<br><code>105:8100</code><br>游客双通道 + 鉴权</div></div>
+      <div class="arrow">→</div>
+      <div class="node"><div class="t">抖音</div><div class="d">aweme.snssdk.com<br>游客：收藏/详情/可见性<br>登录：喜欢/评论/作品/关注</div></div>
+    </div>
+    <div class="note">调用：LocalDouyin 按节点权重批量拉取 → 火枭节流/缓存/预算防护 → 返回标准化 JSON → LocalDouyin 落库（videos/peers/video_peer_sources）</div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h3><span class="dot" style="background:var(--ok)"></span>实测证据 — 编排请求与响应</h3>
+  <table>
+    <tr><th style="width:22%">项</th><th>值</th></tr>
+    <tr><td>编排节点</td><td>小满 <code>MS4wLjABAAAAWMDSHY8f0C6DdNGkj7XJJvAda4BhoL4bfMOYrtVr2gw</code>（公开收藏）</td></tr>
+    <tr><td>请求维度</td><td><code>visibility</code> + <code>collects</code>（纯游客，零登录）</td></tr>
+    <tr><td>响应</td><td><span class="ok">{"ok": 2, "fail": 0, "closed": 0}</span> → visibility 判定 <code>collects:open</code>，collects 采得 9 条</td></tr>
+    <tr><td>落库状态</td><td><span class="ok">peers_from_huoxiao=1, videos_from_huoxiao=9</span>（<code>/api/crawl/status</code> 核验）</td></tr>
+  </table>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h3><span class="dot" style="background:var(--ok)"></span>落库数据真实性核验（videos 表，source=huoxiao）</h3>
+  <table>
+    <tr><th style="width:6%">ID</th><th style="width:40%">标题（真实 desc）</th><th style="width:16%">作者</th><th style="width:12%">点赞</th><th style="width:12%">收藏</th><th style="width:14%">aweme_id</th></tr>
+    <tr><td>195</td><td>欢迎收看《烟火里的江西》家常美食“三鲜豆腐煲”…</td><td>烟火里的江西</td><td>99,826</td><td>42,853</td><td>7665624049695417454</td></tr>
+    <tr><td>196</td><td>云南人做云南菜 做出自己的风格…</td><td>文军</td><td>728</td><td>208</td><td>7685767702602696945</td></tr>
+    <tr><td>197</td><td>果香渗入骨肉当中，汤汁醇厚入味…</td><td>十三月</td><td>10,094</td><td>4,405</td><td>7683029765522984234</td></tr>
+    <tr><td>198</td><td>三杯鸡翅…</td><td>阿文日记</td><td>560</td><td>628</td><td>7686808336269190118</td></tr>
+    <tr><td>199</td><td>想吃谁做的，就@他吧！…椒盐排骨…</td><td>大地雷💣</td><td>711</td><td>777</td><td>7686797617712668992</td></tr>
+    <tr><td>200</td><td>👨‍🍳：猎人炖鸡…</td><td>不吃药</td><td>25,544</td><td>13,274</td><td>7682362121938878291</td></tr>
+    <tr><td>201</td><td>欢迎收看《烟火里的江西》家常小炒“爆炒八爪鱼”…</td><td>烟火里的江西</td><td>74,950</td><td>20,358</td><td>7684918922420755017</td></tr>
+    <tr><td>202</td><td>减肥只吃一碗…砂锅猪蹄…</td><td>谷雨</td><td>251,503</td><td>11,295</td><td>7686437427929734271</td></tr>
+    <tr><td>203</td><td>在外面太累的话就回家我做饭给你吃…</td><td>很难不爱我自己</td><td>91</td><td>3</td><td>7686457173060185829</td></tr>
+  </table>
+  <div class="note">与火枭独立采集结果、抖音 App 前台一致 —— 非空壳、非混淆数据；计数为抖音真实统计。</div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h3><span class="dot" style="background:var(--brand)"></span>P1–P6 里程碑</h3>
+  <div class="tl">
+    <div class="it done"><div class="tm">P1 服务骨架</div><div class="txt"><b>config + cache + server</b>：端口 8100、API_KEY 鉴权、A/B/C 缓存语义（7天/1h/不存）、五表审计、主号日预算 50、亮色面板</div></div>
+    <div class="it done"><div class="tm">P2 采集路由</div><div class="txt"><b>双通道客户端</b>：游客（收藏/详情/可见性）＋登录（喜欢/评论/作品/关注/粉丝，webSign 签名）；能力矩阵实验固化（Web 匿名 403 死路、App 游客空壳结论）</div></div>
+    <div class="it done"><div class="tm">P3 下载服务</div><div class="txt"><b>/v1/download + /v1/task</b>：登录通道取 1080p 直链、流式下载、ftyp 校验；实测 18.4MB 真实 MP4</div></div>
+    <div class="it done"><div class="tm">P4 加固层</div><div class="txt"><b>频率预算 + 指数退避冷却（2096/8/4xx）+ 干扰过滤 + 审计</b>；请求降 ≥80%、缓存命中 ≥95% 验收口径</div></div>
+    <div class="it done"><div class="tm">P5 主号隔离</div><div class="txt"><b>vault 登录态保险箱 + 主号预算 0/50</b>：主号=仅开发验真仪器，生产 100% 游客优先</div></div>
+    <div class="it now"><div class="tm">P6 对接验收</div><div class="txt"><b>LocalDouyin 三路由落地 + 跨机全链路实测通过</b>（本页）—— schedule 编排、JSON 落库、去重、关系写入全部闭环</div></div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <h3><span class="dot" style="background:var(--warn)"></span>遗留与下一步</h3>
+  <div class="chips">
+    <span class="chip"><b>LocalDouyin 侧</b> <code>ALGORITHM_CONFIG.max_daily_new_peers=5</code> 与 100–1000/天目标不符，需调参</span>
+    <span class="chip"><b>正式联调</b> LocalDouyin 8000 端口 + 火枭正式启动（当前测试为 8123 临时端口）</span>
+    <span class="chip"><b>登录维度</b> likes/comments/posts/following/follower 需主号验真缓存或真机 frida 被动采集（游客不可达）</span>
+    <span class="chip"><b>视频下载</b> 用户已确认走登录通道最高码率，待批量任务编排</span>
+  </div>
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html><html lang="zh"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>火枭 · 9-18 全天成果</title>
+<style>
+:root{--bg:#FDF6EF;--card:#fff;--ink:#2A1A12;--sub:#8A6F5E;--line:#F0E2D4;--fire:#FF6B35;--fire2:#B5501F;--green:#35705A;--red:#A14E50;--amber:#9A6A2F}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--ink);font:14px/1.65 -apple-system,"Segoe UI","Microsoft YaHei",sans-serif;padding:0 0 70px}
+.top{background:linear-gradient(180deg,#FFF4EA,var(--bg));border-bottom:1px solid var(--line);padding:26px 0 18px}
+.topin{max-width:1180px;margin:0 auto;padding:0 20px;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.logo{width:58px;height:58px;flex:none}
+h1{font-size:28px;letter-spacing:1px}.en{font-size:11px;color:var(--sub);margin-left:8px;letter-spacing:2px}
+.date{display:inline-block;background:var(--fire);color:#fff;border-radius:6px;padding:1px 10px;font-size:12px;margin-top:4px}
+.sub{color:var(--sub);font-size:13px;margin-top:3px}
+.stats{display:flex;gap:10px;margin-left:auto;flex-wrap:wrap}
+.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 16px;text-align:center;min-width:88px}
+.stat b{display:block;font-size:22px;color:var(--fire);line-height:1.2}
+.stat span{font-size:11px;color:var(--sub)}
+main{max-width:1180px;margin:0 auto;padding:0 20px}
+.sec-h{display:flex;align-items:baseline;gap:12px;margin:34px 0 14px;flex-wrap:wrap}
+.sec-h h2{font-size:19px;position:relative;padding-left:14px}
+.sec-h h2::before{content:'';position:absolute;left:0;top:5px;bottom:5px;width:4px;border-radius:2px;background:var(--fire)}
+.sec-h .desc{color:var(--sub);font-size:12px}
+.seg{font-size:13px;font-weight:700;color:var(--fire2);margin:18px 0 4px;display:flex;gap:8px;align-items:center}
+.seg::after{content:'';flex:1;height:1px;background:var(--line)}
+.seg b{background:#FFF0E6;border-radius:6px;padding:0 10px;font-size:12px}
+.tl{display:grid;grid-template-columns:96px 34px 1fr;gap:0 12px}
+.tl-row{display:contents}
+.tl-time{text-align:right;color:var(--sub);font-size:12px;padding:10px 0;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tl-ax{display:grid;grid-template-columns:1fr 14px 1fr;justify-items:center}
+.tl-ax .dot{width:12px;height:12px;border-radius:50%;background:var(--fire);grid-column:2;align-self:center;position:relative;z-index:1;outline:3px solid var(--bg)}
+.tl-ax::before{content:'';grid-column:1/2;width:100%;height:2px;background:var(--line);align-self:center}
+.tl-ax::after{content:'';grid-column:3/4;width:100%;height:2px;background:var(--line);align-self:center}
+.tl-body{padding:6px 0 6px 4px;border-bottom:1px dashed var(--line)}
+.tl-body .bt{font-weight:700;font-size:14px}
+.tl-body .bd{color:var(--sub);font-size:12px;margin-top:1px}
+.arch{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
+.arch .layer{padding:13px 18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.arch .layer+.layer{border-top:1px dashed var(--line)}
+.arch .lay-t{width:130px;flex:none;font-weight:700;font-size:13px;color:var(--fire2)}
+.arch .chip{background:#FFF4EA;border:1px solid var(--line);border-radius:20px;padding:3px 12px;font-size:12px}
+.arch .chip.ok{background:#E8F5EE}
+.arch .chip.die{background:#FBEAEA;color:var(--red)}
+.arrow{text-align:center;color:var(--fire);font-size:16px;line-height:1;padding:2px 0}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden;table-layout:fixed}
+th,td{padding:8px 12px;text-align:left;border-bottom:1px solid #FAF1E8;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+th{background:#FFF7F0;font-size:12px;color:var(--sub);font-weight:600}
+tr:last-child td{border-bottom:none}
+td code{font-size:11px;color:var(--fire2);background:#FFF4EA;border-radius:4px;padding:1px 6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.card .t{font-weight:700;font-size:14px;margin-bottom:4px}
+.card .d{color:var(--sub);font-size:12px;line-height:1.55}
+.card .k{color:var(--fire);font-weight:700;font-size:16px}
+.rate{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.rate .bar-wrap{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px}
+.rate .bar-title{font-size:12px;color:var(--sub);margin-bottom:7px;display:flex;justify-content:space-between}
+.rate .track{height:12px;background:#F7EDE2;border-radius:6px;overflow:hidden}
+.rate .fill{height:100%;background:linear-gradient(90deg,#FF6B35,#FF9A62);border-radius:6px}
+.todo{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.todo .num{flex:none;width:24px;height:24px;border-radius:50%;background:#FFF0E6;color:var(--fire2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.back{display:inline-block;color:var(--fire2);text-decoration:none;font-size:13px;margin:18px 0 0}
+@media(max-width:700px){.stats{width:100%}.tl{grid-template-columns:64px 26px 1fr;gap:0 8px}.arch .lay-t{width:100%}}
+</style></head><body>
+<div class="top"><div class="topin">
+<svg class="logo" viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="#FF6B35"/><path d="M50 8 L60 40 L50 33 L40 40 Z" fill="#FF3D00"/><path d="M50 92 L60 60 L50 67 L40 60 Z" fill="#FF3D00"/><path d="M8 50 L40 40 L33 50 L40 60 Z" fill="#FF3D00"/><path d="M92 50 L60 40 L67 50 L60 60 Z" fill="#FF3D00"/><circle cx="50" cy="50" r="15" fill="#FFD86B"/></svg>
+<div><h1>火枭<span class="en">DAY 1 · FULL RESULTS</span></h1><div class="date">2026-09-18 全天</div><div class="sub">环境 · 逆向 · 数据流水线 · listcollection 攻坚 —— 全部成果（数据实时读取，真实可验）</div></div>
+<div class="stats">
+<div class="stat"><b>28</b><span>收藏公开</span></div>
+<div class="stat"><b>80</b><span>收藏私密</span></div>
+<div class="stat"><b>1580</b><span>他人收藏</span></div>
+<div class="stat"><b>50</b><span>视频下载</span></div>
+<div class="stat"><b>292</b><span>数据文件</span></div>
+</div></div>
+<main>
+<a class="back" href="index.html">← 火枭验收主站</a>
+
+<div class="sec-h"><h2>全天里程碑</h2><span class="desc">白天环境与逆向 → 下午数据流水线 → 晚间 listcollection 攻坚</span></div>
+<div class="seg">白天<b>环境与逆向</b></div><div class="tl-row"><div class="tl-time">01</div><div class="tl-ax"><span class="dot"></span></div><div class="tl-body"><div class="bt">VT-x 开启</div><div class="bd">BIOS 开启虚拟化，雷电/真机双路线验证，选定小米 11 真机</div></div></div><div class="tl-row"><div class="tl-time">02</div><div class="tl-ax"><span class="dot"></span></div><div class="tl-body"><div class="bt">真机就绪</div><div class="bd">小米11 root（Magisk）· adb 连接 · frida-server 16.7.19 部署</div></div></div><div class="tl-row"><div class="tl-time">03</div><div class="tl-ax"><span class="dot"></span></div><div class="tl-body"><div class="bt">Cookie 保险箱</div><div class="bd">封装 douyin-cookie-vault 技能：登录态持久化，换账号重扫复用</div></div></div><div class="tl-row"><div class="tl-time">04</div><div class="tl-ax"><span class="dot"></span></div><div class="tl-body"><div class="bt">静态分析</div><div class="bd">jadx 反编译抖音 39.7.0 APK，定位包名/结构/接口线索</div></div></div><div class="tl-row"><div class="tl-time">05</div><div class="tl-ax"><span class="dot"></span></div><div class="tl-body"><div class="bt">动态注入</div><div class="bd">frida hook 网络层与加密层，定位 X-Bogus 生成点与请求链路</div></div></div><div class="tl-row"><div class="tl-time">06</div><div class="tl-ax"><span class="dot"></span></div><div class="tl-body"><div class="bt">App 抓包</div><div class="bd">真机采集 App 真实请求 → app_requests.json（App 端接口参数源头）</div></div></div><div class="seg">下午<b>数据流水线与验收</b></div><div class="tl-row"><div class="tl-time">01</div><div class="tl-ax"><span class="dot"></span></div><div class="tl-body"><div class="bt">Web 通道跑通</div><div class="bd">参考项目认证+搜索+作品+喜欢/关注实测</div></div></div><div class="tl-row"><div class="tl-time">02</div><div class="tl-ax"><span class="dot"></span></div><div class="tl-body"><div class="bt">主号数据</div><div class="bd">喜欢 60 / 收藏真值 27 / 关注 109 全量拉取</div></div></div><div class="tl-row"><div class="tl-time">03</div><div class="tl-ax"><span class="dot"></span></div><div class="tl-body"><div class="bt">隐私矩阵</div><div class="bd">109 关注用户喜欢/收藏/关注/粉丝四维公开性扫描</div></div></div><div class="tl-row"><div class="tl-time">04</div><div class="tl-ax"><span class="dot"></span></div><div class="tl-body"><div class="bt">发散网络</div><div class="bd">10 人×前 20 喜欢 · 收藏量 Top50 · 评论网络（评论者主页可跳转）</div></div></div><div class="tl-row"><div class="tl-time">05</div><div class="tl-ax"><span class="dot"></span></div><div class="tl-body"><div class="bt">视频下载</div><div class="bd">Top50 最高码率无水印 50/50（202MB，tkhd 递归验证）</div></div></div><div class="tl-row"><div class="tl-time">06</div><div class="tl-ax"><span class="dot"></span></div><div class="tl-body"><div class="bt">验收主站</div><div class="bd">亮色火枭 index.html 上线（lint 全绿：0 consoleErrors/0 死按钮/0 溢出）</div></div></div><div class="seg">晚间<b>listcollection 攻坚</b></div><div class="tl-row"><div class="tl-time">01</div><div class="tl-ax"><span class="dot"></span></div><div class="tl-body"><div class="bt">Web 死路确认</div><div class="bd">135 组合探测矩阵全 403/404 → Web 接口已下架（Janus 404）</div></div></div><div class="tl-row"><div class="tl-time">02</div><div class="tl-ax"><span class="dot"></span></div><div class="tl-body"><div class="bt">App 端突破</div><div class="bd">历史抓包发现 aweme.snssdk.com listcollection，直连成功无需 X-Bogus</div></div></div><div class="tl-row"><div class="tl-time">03</div><div class="tl-ax"><span class="dot"></span></div><div class="tl-body"><div class="bt">双模式验证</div><div class="bd">登录态 32 条收藏（真值对上）· 游客态不登录拿公开数据</div></div></div><div class="tl-row"><div class="tl-time">04</div><div class="tl-ax"><span class="dot"></span></div><div class="tl-body"><div class="bt">108 人矩阵</div><div class="bd">收藏公开性全量：28 公开 / 80 私密（status=3002279 判定）</div></div></div><div class="tl-row"><div class="tl-time">05</div><div class="tl-ax"><span class="dot"></span></div><div class="tl-body"><div class="bt">全量采集</div><div class="bd">28 公开用户 1580 条收藏（去重 1577，游客模式零封号风险）</div></div></div><div class="tl-row"><div class="tl-time">06</div><div class="tl-ax"><span class="dot"></span></div><div class="tl-body"><div class="bt">他人收藏验收页</div><div class="bd">others.html 上线：28 卡片可展开 + 80 私密标签云 + 搜索</div></div></div>
+
+<div class="sec-h"><h2>采集通道架构</h2><span class="desc">三通道互为备份 · 游客态为极速主力 · 全部代码层直连</span></div>
+<div class="arch">
+<div class="layer"><span class="lay-t">通道 A · Web</span><span class="chip ok">主号 Cookie + webSign</span><span class="chip">favorites 喜欢</span><span class="chip">following 关注</span><span class="chip die">listcollection 已下架 404</span><span class="chip die">collects/list 仅自己私有</span></div>
+<div class="arrow">↓</div>
+<div class="layer"><span class="lay-t">通道 B · App</span><span class="chip ok">设备参数直连（无需 X-Bogus）</span><span class="chip">aweme/v1/aweme/listcollection</span><span class="chip">status=3002279 → 私密判定</span></div>
+<div class="arrow">↓</div>
+<div class="layer"><span class="lay-t">通道 C · 游客</span><span class="chip ok">HTTP 预取游客 Cookie（零登录）</span><span class="chip">公开数据极速采集</span><span class="chip">无限身份轮换 · 零封号</span></div>
+<div class="arrow">↓</div>
+<div class="layer"><span class="lay-t">服务层</span><span class="chip">collects_client 双模式采集器</span><span class="chip">Cookie 保险箱技能</span><span class="chip">FastAPI 雏形 → LocalDouyin 调用方</span></div>
+</div>
+
+<div class="sec-h"><h2>数据资产</h2><span class="desc">292 个数据文件 · 核心 14 项列示</span></div>
+<table><colgroup><col style="width:26%"><col style="width:52%"><col style="width:22%"></colgroup><thead><tr><th>内容</th><th>文件</th><th>大小</th></tr></thead><tbody>
+<tr><td>主号全景数据</td><td><code>main_account_data.json</code></td><td>69.4MB</td></tr><tr><td>主号喜欢 Top50</td><td><code>main_likes_top50.json</code></td><td>3.2MB</td></tr><tr><td>主号收藏全量</td><td><code>my_favorites_all.json</code></td><td>908KB</td></tr><tr><td>收藏真值</td><td><code>real_favorites.json</code></td><td>3KB</td></tr><tr><td>喜欢真值</td><td><code>real_likes_web.json</code></td><td>10KB</td></tr><tr><td>隐私矩阵 v4</td><td><code>privacy_matrix_v4.json</code></td><td>77KB</td></tr><tr><td>关注可见性矩阵</td><td><code>following_visibility_matrix.json</code></td><td>16KB</td></tr><tr><td>他人喜欢 10×20</td><td><code>ten_users_likes.json</code></td><td>55KB</td></tr><tr><td>收藏量 Top50</td><td><code>videos_top50.json</code></td><td>46KB</td></tr><tr><td>视频详情</td><td><code>videos_detail.json</code></td><td>226KB</td></tr><tr><td>评论网络 Top50</td><td><code>comments_top50.json</code></td><td>441KB</td></tr><tr><td>收藏公开性扫描</td><td><code>collects_visibility_scan.json</code></td><td>21KB</td></tr><tr><td>他人收藏全量</td><td><code>others_collects_full.json</code></td><td>369KB</td></tr><tr><td>App 抓包存档</td><td><code>app_requests.json</code></td><td>11KB</td></tr>
+</tbody></table>
+
+<div class="sec-h"><h2>关键数字</h2><span class="desc">全部来自实测</span></div>
+<div class="grid">
+<div class="card"><div class="k">108 人</div><div class="t">关注用户隐私矩阵</div><div class="d">喜欢/收藏/关注/粉丝四维公开性，其中喜欢公开 85 人</div></div>
+<div class="card"><div class="k">200 组</div><div class="t">他人喜欢样本</div><div class="d">公开喜欢用户 × 前 20 条，发散网络源头</div></div>
+<div class="card"><div class="k">Top 50</div><div class="t">收藏量排行</div><div class="d">数据池：主号喜欢+收藏+他人喜欢，按收藏量排序</div></div>
+<div class="card"><div class="k">50 个</div><div class="t">视频评论网络</div><div class="d">每视频前 20 条评论，评论者主页可跳转发散</div></div>
+<div class="card"><div class="k">50 个</div><div class="t">视频已下载</div><div class="d">最高码率无水印 · 202MB · 50/50 验证通过</div></div>
+<div class="card"><div class="k">87 个</div><div class="t">工具与生成脚本</div><div class="d">探测矩阵/采集/扫描/翻页/建站，全部可复现</div></div>
+</div>
+
+<div class="sec-h"><h2>能力开放度</h2><span class="desc">游客态 = 公开数据极速通道，主号仅用于必须登录的场景</span></div>
+<div class="rate">
+<div class="bar-wrap"><div class="bar-title"><span>他人收藏获取</span><b>100%</b></div><div class="track"><div class="fill" style="width:100%"></div></div></div>
+<div class="bar-wrap"><div class="bar-title"><span>公开性判定</span><b>100%</b></div><div class="track"><div class="fill" style="width:100%"></div></div></div>
+<div class="bar-wrap"><div class="bar-title"><span>游客极速模式</span><b>100%</b></div><div class="track"><div class="fill" style="width:100%"></div></div></div>
+<div class="bar-wrap"><div class="bar-title"><span>视频最高码率下载</span><b>100%</b></div><div class="track"><div class="fill" style="width:100%"></div></div></div>
+</div>
+
+<div class="sec-h"><h2>当前状态与待办</h2><span class="desc">攻坚主线已通 · 服务化按你调度推进</span></div>
+<div class="todo"><span class="num">1</span><div><b>双模式并入服务接口</b><div style="color:var(--sub);font-size:12px">登录/游客采集能力封装为火枭 HTTP 服务（192.168.0.105），供 LocalDouyin（107）跨机调用</div></div></div>
+<div class="todo"><span class="num">2</span><div><b>数据落地契约</b><div style="color:var(--sub);font-size:12px">JSON + 导入路由 vs 直写 LocalDouyin SQLite —— 待你定</div></div></div>
+<div class="todo"><span class="num">3</span><div><b>视频全量最高码率下载</b><div style="color:var(--sub);font-size:12px">你定的最后阶段，覆盖全部收藏/喜欢池</div></div></div>
+<div class="todo"><span class="num">4</span><div><b>反检测加固</b><div style="color:var(--sub);font-size:12px">你指定另开项目，按调用方需求针对性设计</div></div></div>
+</main>
+</body></html>

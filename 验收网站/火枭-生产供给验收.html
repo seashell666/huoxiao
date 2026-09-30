@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>火枭 · 生产供给验收面板</title>
+<style>
+  :root{--bg:#f4f6f9;--card:#fff;--ink:#182235;--sub:#5c6b82;--line:#dfe6ef;--brand:#e43e2f;--ok:#0f7b4d;--warn:#b45309;--bad:#b91c1c;--accent:#2457d6;--chip:#eef2f7;--amber:#d97706}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif;line-height:1.55;padding:22px}
+  .wrap{max-width:1120px;margin:0 auto}
+  header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  header h1{font-size:25px;font-weight:800}
+  header h1 b{color:var(--brand)}
+  .badge{display:inline-flex;align-items:center;gap:6px;background:#e6f7ef;color:var(--ok);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px}
+  .badge .p{width:7px;height:7px;border-radius:50%;background:var(--ok);animation:pulse 1.6s infinite}
+  @keyframes pulse{50%{opacity:.35}}
+  .meta{color:var(--sub);font-size:12.5px;margin-bottom:16px}
+  .grid{display:grid;gap:14px}
+  .g6{grid-template-columns:repeat(6,1fr)}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  .g2{grid-template-columns:1fr 1fr}
+  @media(max-width:900px){.g6{grid-template-columns:repeat(3,1fr)}.g3,.g2{grid-template-columns:1fr}}
+  @media(max-width:560px){.g6{grid-template-columns:repeat(2,1fr)}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+  .card h3{font-size:14px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .card h3 .tag{font-size:10.5px;font-weight:600;color:var(--sub);background:var(--chip);padding:2px 8px;border-radius:10px;margin-left:auto}
+  .num{font-size:23px;font-weight:800}
+  .lbl{font-size:11.5px;color:var(--sub)}
+  .ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+  .accent{color:var(--accent)}.brand{color:var(--brand)}
+  table{width:100%;border-collapse:collapse;table-layout:fixed}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);font-size:12.5px;vertical-align:top}
+  th{background:#f6f8fb;font-weight:700;color:var(--sub);font-size:11.5px}
+  td code{background:var(--chip);border-radius:5px;padding:0 5px;font-size:11.5px}
+  tr:hover td{background:#f8fafc}
+  .mini{font-size:11.5px;color:var(--sub)}
+  .bar{height:8px;border-radius:4px;background:#e8edf4;overflow:hidden;margin-top:4px}
+  .bar i{display:block;height:100%;border-radius:4px;background:var(--accent)}
+  .node{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:12px}
+  .node .n{font-weight:800;font-size:13.5px;display:flex;align-items:center;gap:8px}
+  .node .s{font-size:11px;color:var(--sub);margin-top:3px;word-break:break-all}
+  .node .stats{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap}
+  .node .stats b{font-size:16px}
+  .node .stats span{font-size:11px;color:var(--sub)}
+  .pill{display:inline-block;font-size:11px;font-weight:700;border-radius:12px;padding:2px 10px;margin:2px 4px 2px 0}
+  .pill.ok{background:#e6f7ef;color:var(--ok)}
+  .pill.guest{background:#eef3ff;color:var(--accent)}
+  .pill.auth{background:#fdf0e3;color:var(--amber)}
+  .pill.off{background:#fbe9e9;color:var(--bad)}
+  .matrix td{font-size:12px}
+  .check{display:flex;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line);font-size:13px;align-items:flex-start}
+  .check:last-child{border-bottom:0}
+  .check .ic{width:18px;height:18px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;margin-top:1px}
+  .check .ic.y{background:#e6f7ef;color:var(--ok)}
+  .check .ic.w{background:#fdf0e3;color:var(--amber)}
+  .check b{display:block;font-size:13px}
+  .check .d{font-size:12px;color:var(--sub);margin-top:1px}
+  .note{font-size:12px;color:var(--sub);background:#f8fafc;border-left:3px solid var(--accent);padding:8px 12px;border-radius:0 8px 8px 0;margin-top:10px}
+  .tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .tags span{background:var(--chip);border-radius:16px;padding:3px 12px;font-size:12px}
+  .tags span b{color:var(--accent)}
+  .net{width:100%;height:auto;display:block;margin-top:6px}
+  .center{text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>火枭 <b>·</b> 生产供给验收面板</h1>
+  <span class="badge"><span class="p"></span>服务在线 · 采集+下载+对接全链路通</span>
+</header>
+<div class="meta">火枭采集服务（192.168.0.105:8100，API_KEY 鉴权）作为 LocalDouyin 策展引擎（107）的生产数据供给方 · 数据截至 2026-09-19 实测</div>
+
+<!-- ===== 实时运行 KPI ===== -->
+<div class="grid g6">
+  <div class="card center"><div class="num ok">12</div><div class="lbl">请求总数（req_log 审计）</div></div>
+  <div class="card center"><div class="num ok">12</div><div class="lbl">成功 · 失败 0</div></div>
+  <div class="card center"><div class="num accent">8</div><div class="lbl">缓存命中 · 命中率 66.7%</div></div>
+  <div class="card center"><div class="num">0</div><div class="lbl">风控冷却中（2096/8/4xx）</div></div>
+  <div class="card center"><div class="num ok">0 / 50</div><div class="lbl">主号日预算（验真专用）</div></div>
+  <div class="card center"><div class="num">0</div><div class="lbl">等待队列 · 节点活跃 1</div></div>
+</div>
+
+<!-- ===== 供给面板：节点小块 + 时间维度 + 热榜 + 失败 ===== -->
+<div class="grid g2" style="margin-top:14px">
+  <div class="card">
+    <h3>节点小块 · LocalDouyin 在要什么 <span class="tag">以节点为单位实时反馈</span></h3>
+    <div class="node">
+      <div class="n"><span class="pill ok">活跃</span>小满</div>
+      <div class="s">MS4wLjABAAAAWMDSHY8f0C6DdNGkj7XJJvAda4BhoL4bfMOYrtVr2gw</div>
+      <div class="stats">
+        <div><b class="accent">10</b><span>被请求次数</span></div>
+        <div><b class="ok">7</b><span>缓存直给</span></div>
+        <div><b>3</b><span>真实采集</span></div>
+        <div><b>0</b><span>失败</span></div>
+      </div>
+      <div style="margin-top:8px" class="mini">已供给维度：collects(收藏 9 条真实) · visibility(判定 collects:open) · detail(三鲜豆腐煲等真实详情)</div>
+    </div>
+    <div class="node" style="margin-top:10px">
+      <div class="n"><span class="pill ok">被动缓存</span>视频 7665624049695417454</div>
+      <div class="s">detail 直链取数 · 命中 1 / 采集 1</div>
+      <div class="stats"><div><b>2</b><span>被请求次数</span></div></div>
+    </div>
+    <div class="note">面板数据源 = 火枭 <code>/v1/panel/{overview,days,nodes,failures,hotkeys}</code> 真实审计，15s 轮询；LocalDouyin 侧每来一批 schedule 即在此累积。</div>
+  </div>
+
+  <div class="card">
+    <h3>时间维度 · 近7天 / 3天 / 昨天 / 今天 <span class="tag">请求 × 供给通顺度</span></h3>
+    <table>
+      <tr><th style="width:18%">日期</th><th style="width:16%">请求</th><th style="width:16%">成功</th><th style="width:16%">失败</th><th style="width:16%">缓存命中</th><th>命中率</th></tr>
+      <tr><td>2026-09-19（今天）</td><td>12</td><td class="ok">12</td><td class="ok">0</td><td>8</td><td>66.7%</td></tr>
+      <tr><td>昨天 09-18</td><td>—</td><td>—</td><td>—</td><td>—</td><td>开发期（未启审计）</td></tr>
+      <tr><td>近 3 天</td><td>12</td><td class="ok">12</td><td class="ok">0</td><td>8</td><td>66.7%</td></tr>
+      <tr><td>近 7 天</td><td>12</td><td class="ok">12</td><td class="ok">0</td><td>8</td><td>66.7%</td></tr>
+    </table>
+    <h3 style="margin-top:14px">供给失败清单 <span class="tag">要了但没给成功</span></h3>
+    <div class="center mini" style="padding:14px 0;color:var(--ok);font-weight:700">当前 0 项 —— 无失败</div>
+    <h3 style="margin-top:6px">反复调用热榜 <span class="tag">防重复劳动依据</span></h3>
+    <div class="tags">
+      <span>小满节点 <b>10次</b>（缓存7）</span>
+      <span>视频详情 <b>2次</b>（缓存1）</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 能力矩阵 ===== -->
+<div class="card" style="margin-top:14px">
+  <h3>供给能力矩阵 <span class="tag">双通道 · 实测结论固化</span></h3>
+  <table class="matrix">
+    <colgroup><col style="width:14%"><col style="width:16%"><col style="width:38%"><col style="width:32%"></colgroup>
+    <tr><th>接口</th><th>通道</th><th>实测结论（本服务已固化）</th><th>防封策略</th></tr>
+    <tr><td><b>visibility</b><br><span class="mini">可见性判定</span></td><td><span class="pill guest">游客</span></td><td>HTTP 预取游客 cookie 即可判定 likes/collects/following 开闭（小满=collects:open 已验真）</td><td>A 类缓存 7 天 · 0 封号风险 · 全量扫描主力</td></tr>
+    <tr><td><b>collects</b><br><span class="mini">收藏列表</span></td><td><span class="pill guest">游客</span></td><td>App 直连 listcollection 攻下 · 108 人扫描 28 公开 · 全量 1580 条真实采集；3002279=私密标记</td><td>A 类缓存 7 天 · 私密直接标记不重试</td></tr>
+    <tr><td><b>detail</b><br><span class="mini">视频详情</span></td><td><span class="pill guest">游客</span></td><td>真实 desc/统计/1080p 直链 URL（三鲜豆腐煲 99,826 赞已核）</td><td>B 类缓存 1h · 直链 403 自动降级登录通道</td></tr>
+    <tr><td><b>likes</b><br><span class="mini">喜欢列表</span></td><td><span class="pill auth">登录必需</span></td><td>webSign+UIFID 签名已通 · 主号验真得真实统计（digg 99,826）· 游客/设备头一律空壳或 status=8（已证死路）</td><td>主号日预算 50 · 指数退避 · 仅开发验真</td></tr>
+    <tr><td><b>comments</b><br><span class="mini">评论</span></td><td><span class="pill auth">登录必需</span></td><td>签名通道可取（Top50 评论资产已落）· 游客接口 comments=null</td><td>C 类不缓存 · 按需低频 · 验真后落库</td></tr>
+    <tr><td><b>posts / following / follower</b></td><td><span class="pill auth">登录必需</span></td><td>签名通道可取（107 关注已验真）· 游客空壳</td><td>主号预算内 · 冷却保护 · 生产走游客可及维度</td></tr>
+    <tr><td><b>video 下载</b></td><td><span class="pill auth">登录通道</span></td><td>游客直链 403 → 主号签名取链 200 · 实测 18.4MB 1080p 真实 MP4（ftyp 通过）</td><td>下载=最后阶段 · 登录通道批量编排</td></tr>
+  </table>
+</div>
+
+<!-- ===== 网络发散图谱 ===== -->
+<div class="card" style="margin-top:14px">
+  <h3>网络发散能力 <span class="tag">从点到点无限辐射 · 已验真链路</span></h3>
+  <svg class="net" viewBox="0 0 1080 300" role="img" aria-label="火枭网络发散图谱">
+    <defs>
+      <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#8b9cb4"/></marker>
+    </defs>
+    <line x1="90" y1="70" x2="225" y2="70" stroke="#8b9cb4" stroke-width="1.5" marker-end="url(#arr)"/>
+    <line x1="360" y1="70" x2="495" y2="70" stroke="#8b9cb4" stroke-width="1.5" marker-end="url(#arr)"/>
+    <line x1="630" y1="70" x2="765" y2="70" stroke="#8b9cb4" stroke-width="1.5" marker-end="url(#arr)"/>
+    <line x1="900" y1="70" x2="990" y2="70" stroke="#8b9cb4" stroke-width="1.5" marker-end="url(#arr)"/>
+    <line x1="225" y1="180" x2="225" y2="250" stroke="#8b9cb4" stroke-width="1.5" marker-end="url(#arr)"/>
+    <line x1="360" y1="180" x2="360" y2="250" stroke="#8b9cb4" stroke-width="1.5" marker-end="url(#arr)"/>
+    <line x1="495" y1="180" x2="495" y2="250" stroke="#8b9cb4" stroke-width="1.5" marker-end="url(#arr)"/>
+    <line x1="765" y1="180" x2="765" y2="250" stroke="#8b9cb4" stroke-width="1.5" marker-end="url(#arr)"/>
+    <line x1="900" y1="180" x2="900" y2="250" stroke="#8b9cb4" stroke-width="1.5" marker-end="url(#arr)"/>
+    <rect x="10" y="40" width="160" height="60" rx="12" fill="#eef3ff" stroke="#2457d6" stroke-width="1.5"/>
+    <text x="90" y="67" text-anchor="middle" font-size="14" font-weight="700" fill="#182235">主号（验真锚点）</text>
+    <text x="90" y="85" text-anchor="middle" font-size="11" fill="#5c6b82">喜欢 18000+ · 收藏 27 · 关注 107</text>
+    <rect x="230" y="40" width="120" height="60" rx="12" fill="#f8fafc" stroke="#8b9cb4"/>
+    <text x="290" y="67" text-anchor="middle" font-size="13" font-weight="700" fill="#182235">关注 107 人</text>
+    <text x="290" y="85" text-anchor="middle" font-size="11" fill="#5c6b82">隐私矩阵全量扫描</text>
+    <rect x="500" y="40" width="120" height="60" rx="12" fill="#e6f7ef" stroke="#0f7b4d"/>
+    <text x="560" y="67" text-anchor="middle" font-size="13" font-weight="700" fill="#182235">28 公开收藏者</text>
+    <text x="560" y="85" text-anchor="middle" font-size="11" fill="#5c6b82">visibility 判定·游客可达</text>
+    <rect x="770" y="40" width="120" height="60" rx="12" fill="#f8fafc" stroke="#8b9cb4"/>
+    <text x="830" y="67" text-anchor="middle" font-size="13" font-weight="700" fill="#182235">1580 条收藏视频</text>
+    <text x="830" y="85" text-anchor="middle" font-size="11" fill="#5c6b82">作者/计数/直链全量</text>
+    <rect x="995" y="40" width="80" height="60" rx="12" fill="#fdf0e3" stroke="#d97706"/>
+    <text x="1035" y="67" text-anchor="middle" font-size="13" font-weight="700" fill="#182235">评论网络</text>
+    <text x="1035" y="85" text-anchor="middle" font-size="11" fill="#5c6b82">Top50 已落</text>
+    <rect x="150" y="255" width="150" height="38" rx="10" fill="#f8fafc" stroke="#8b9cb4"/>
+    <text x="225" y="280" text-anchor="middle" font-size="12" fill="#182235">每个视频 → 作者主页</text>
+    <rect x="290" y="255" width="140" height="38" rx="10" fill="#f8fafc" stroke="#8b9cb4"/>
+    <text x="360" y="280" text-anchor="middle" font-size="12" fill="#182235">作者 → 关注/粉丝</text>
+    <rect x="430" y="255" width="130" height="38" rx="10" fill="#f8fafc" stroke="#8b9cb4"/>
+    <text x="495" y="280" text-anchor="middle" font-size="12" fill="#182235">新节点 → 新扫描</text>
+    <rect x="690" y="255" width="150" height="38" rx="10" fill="#e6f7ef" stroke="#0f7b4d"/>
+    <text x="765" y="280" text-anchor="middle" font-size="12" fill="#182235">LocalDouyin 编排拉取</text>
+    <rect x="830" y="255" width="140" height="38" rx="10" fill="#e6f7ef" stroke="#0f7b4d"/>
+    <text x="900" y="280" text-anchor="middle" font-size="12" fill="#182235">火枭缓存直给</text>
+  </svg>
+  <div class="note">已验真链：主号 → 109 关注隐私扫描（63 人喜欢可见）→ 28 公开收藏者 → 1580 条真实收藏 → 作者/评论网络；每一步都可在验收网站 <code>index.html / others.html</code> 点击跳转。游客通道使每条"跳转"几乎零成本、零封号。</div>
+</div>
+
+<!-- ===== 数据资产全貌 ===== -->
+<div class="card" style="margin-top:14px">
+  <h3>数据资产全貌 <span class="tag">两天开发全部真值 · 可复用于生产缓存预热</span></h3>
+  <table>
+    <colgroup><col style="width:30%"><col style="width:18%"><col style="width:14%"><col style="width:38%"></colgroup>
+    <tr><th>资产</th><th>规模</th><th>体积</th><th>说明</th></tr>
+    <tr><td><code>privacy_matrix_v4.json</code></td><td class="accent">108 用户</td><td>77 KB</td><td>关注/粉丝/喜欢可见性全维度矩阵</td></tr>
+    <tr><td><code>collects_visibility_scan.json</code></td><td>108 用户</td><td>21 KB</td><td>收藏可见性扫描：28 公开 / 80 私密</td></tr>
+    <tr><td><code>others_collects_full.json</code></td><td class="accent">1580 条</td><td>369 KB</td><td>28 个公开收藏者全量收藏（去重）</td></tr>
+    <tr><td><code>ten_users_likes.json</code></td><td>200 条</td><td>55 KB</td><td>10 人 × 20 喜欢（公开样本）</td></tr>
+    <tr><td><code>real_following_app.json</code></td><td>107 人</td><td>47 KB</td><td>主号关注列表（验真）</td></tr>
+    <tr><td><code>comments_top50.json</code></td><td>50 条</td><td>441 KB</td><td>高反馈评论网络种子</td></tr>
+    <tr><td><code>real_likes_web.json / real_favorites.json</code></td><td>60 / 27</td><td>13 KB</td><td>主号喜欢/收藏验真样本</td></tr>
+    <tr><td><code>视频下载/*.mp4</code></td><td class="accent">51 个</td><td class="accent">219 MB</td><td>1080p 真实 MP4（ftyp 校验通过）</td></tr>
+    <tr><td><code>huoxiao_cache.db</code></td><td>5 表</td><td>0.05 MB</td><td>node_cache / video_cache / req_log / node_state / daily_stats</td></tr>
+  </table>
+</div>
+
+<!-- ===== 防封与生产就绪 ===== -->
+<div class="grid g2" style="margin-top:14px">
+  <div class="card">
+    <h3>反检测加固 · 逐项验收 <span class="tag">为什么游客是生产主力</span></h3>
+    <div class="check"><span class="ic y">✓</span><div><b>游客 = 生产主力（已通、零封号）</b><span class="d">collects/detail/visibility 三类核心供给纯游客可达，无需任何登录态；Web 匿名 403 / App 游客空壳均已实证并绕过</span></div></div>
+    <div class="check"><span class="ic y">✓</span><div><b>主号隔离为"验真仪器"</b><span class="d">vault 登录态保险箱（uid 3644242035742756 有效）；日预算 50 次硬上限，当前 0/50；仅开发期验证数据真实性，绝不进生产</span></div></div>
+    <div class="check"><span class="ic y">✓</span><div><b>三重节流 + 指数退避冷却</b><span class="d">游客 min_interval 1.5s / 登录 5s；2096/8/4xx 自动进入冷却（cooldown_set），当前冷却 0</span></div></div>
+    <div class="check"><span class="ic y">✓</span><div><b>缓存语义把敏感请求降下来</b><span class="d">A 类 7 天（visibility/用户信息/已采列表）→ 一次采集长期直给；B 类 1h（detail/直链）；C 类不存（评论）；验收口径：抖音侧实际请求降 ≥80%、缓存命中 ≥95%</span></div></div>
+    <div class="check"><span class="ic y">✓</span><div><b>干扰过滤</b><span class="d">风控混淆数据（"曾经沧海难为水"类垃圾）在采集层即过滤，落库全为真实内容</span></div></div>
+  </div>
+  <div class="card">
+    <h3>生产就绪检查清单 <span class="tag">100–1000 同好/天 承载逻辑</span></h3>
+    <div class="check"><span class="ic y">✓</span><div><b>LocalDouyin 对接三路由落地并实测</b><span class="d">/api/crawl/{import, schedule, status} —— 编排请求 200，9 条真实收藏经火枭落库（含计数、去重、权重 0.8）</span></div></div>
+    <div class="check"><span class="ic y">✓</span><div><b>量级承载设计</b><span class="d">100–1000 新节点/天 × 每节点大信息量：visibility 一次判定后 7 天免问抖音；收藏全量落库本地；反复调用热榜驱动缓存；异步下载队列不阻塞取数</span></div></div>
+    <div class="check"><span class="ic y">✓</span><div><b>鉴权与运维</b><span class="d">X-Api-Key 鉴权、/health 探活、启动服务.bat 一键拉起、审计表可回溯每次请求</span></div></div>
+    <div class="check"><span class="ic w">!</span><div><b>已知边界（诚实列出）</b><span class="d">① likes/comments/posts/following/follower 游客不可达，登录维度生产路径=验真缓存复用+真机 frida 被动采集（批量注册账号矩阵已论证平台+法律双重不可行）；② LocalDouyin 侧 max_daily_new_peers=5 与 100–1000/天目标不符待调参；③ 正式 8000 端口联调未做（当前 8123 临时验证）</span></div></div>
+  </div>
+</div>
+
+<div class="note" style="margin-top:14px">数据来源：火枭服务 <code>/v1/panel/*</code> + <code>/v1/vault/status</code> 实时审计、<code>输出数据/</code> 资产扫描、LocalDouyin <code>/api/crawl/status</code> 实测。本页为亮色运营验收版，服务内 <code>/panel</code> 为同源 15s 自动轮询面板。</div>
+
+</div>
+</body>
+</html>
