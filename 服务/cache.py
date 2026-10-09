@@ -70,6 +70,10 @@ def init():
         value INTEGER DEFAULT 0,
         PRIMARY KEY(date, key)
     );
+    CREATE TABLE IF NOT EXISTS main_req(
+        ts INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_mainreq_ts ON main_req(ts);
     """)
     c.commit()
     c.close()
@@ -195,9 +199,35 @@ def main_budget_used():
     return r["value"] if r else 0
 
 
+def _ensure_main_req():
+    """惰性建表：脚本直接 import cache（不经 init()）时也能自愈"""
+    c = _conn()
+    c.executescript(
+        "CREATE TABLE IF NOT EXISTS main_req(ts INTEGER NOT NULL);"
+        "CREATE INDEX IF NOT EXISTS idx_mainreq_ts ON main_req(ts);")
+    c.commit()
+    c.close()
+
+
 def main_budget_tick(n=1):
-    """主号请求计数"""
+    """主号请求计数：日预算（daily_stats）+ 滑动 2h 窗口（main_req）"""
+    now = int(time.time())
     _daily_incr(time.strftime("%Y-%m-%d"), "main_budget", n)
+    _ensure_main_req()
+    c = _conn()
+    c.executemany("INSERT INTO main_req(ts) VALUES(?)", [(now,)] * n)
+    c.execute("DELETE FROM main_req WHERE ts < ?", (now - 7200,))  # 只留 2h 窗口，表保持小
+    c.commit()
+    c.close()
+
+
+def main_2h_budget_used(window=7200):
+    """近 window 秒主号已用请求数（滑动窗口，默认 2 小时）"""
+    _ensure_main_req()
+    c = _conn()
+    r = c.execute("SELECT COUNT(*) n FROM main_req WHERE ts > ?", (int(time.time()) - window,)).fetchone()
+    c.close()
+    return r["n"] if r else 0
 
 
 def cooldown_set(key, backoff_base=5.0, fail_count=1):

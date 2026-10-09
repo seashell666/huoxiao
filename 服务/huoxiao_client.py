@@ -117,6 +117,19 @@ class GuestChannel:
             return None, {"status": st}
         return HuoxiaoClient._norm(d, detail=True), {"status": 0}
 
+    def get_detail_raw(self, aid):
+        """带限流的原始 detail（补采字段用）：返回未归一化的 aweme_detail"""
+        self._guard(f"guest:detail:{aid}")
+        j = self.app.get_page_detail(aid) if hasattr(self.app, "get_page_detail") else None
+        if j is None:
+            return None, {"status": 501, "err": "guest detail unavailable"}
+        st = j.get("status_code")
+        d = j.get("aweme_detail") or {}
+        if st != 0:
+            self._mark_fail(f"guest:detail:{aid}", st)
+            return None, {"status": st}
+        return d, {"status": 0}
+
     def visibility(self, sec):
         """游客通道可见性判定：同时判断收藏+喜欢两个列表"""
         out = {}
@@ -155,11 +168,13 @@ class AuthChannel:
         self._last = time.time()
 
     def _guard(self, key):
-        """冷却 + 主号日预算（config.MAIN_DAILY_BUDGET）"""
+        """冷却 + 主号日预算 + 滑动 2h 预算（config.MAIN_DAILY_BUDGET / MAIN_2H_BUDGET）"""
         import cache
         import config
         if cache.main_budget_used() >= config.MAIN_DAILY_BUDGET:
             raise RuntimeError("main_budget_exhausted")
+        if cache.main_2h_budget_used() >= config.MAIN_2H_BUDGET:
+            raise RuntimeError("main_2h_budget_exhausted")
         wait = cache.cooldown_wait(f"auth:{key}")
         if wait > 0:
             raise RuntimeError(f"cooldown:{wait}s")
@@ -228,9 +243,20 @@ class AuthChannel:
         items = []
         for c in (j.get("comments") or []):
             u = c.get("user") or {}
-            items.append({"comment_id": c.get("cid", ""), "text": c.get("text", ""),
-                          "digg_count": c.get("digg_count", 0), "reply_count": c.get("reply_comment_total", 0),
-                          "user": {"nickname": u.get("nickname", ""), "sec_uid": u.get("sec_uid", "")}})
+            av = (u.get("avatar_thumb") or {}).get("url_list") or [""]
+            # 数据采集规范：一次请求全字段落库，禁止裁剪。raw 保留完整原始评论 JSON。
+            items.append({
+                "comment_id": c.get("cid", ""),
+                "text": c.get("text", ""),
+                "digg_count": c.get("digg_count", 0),
+                "reply_count": c.get("reply_comment_total", 0),
+                "create_time": c.get("create_time", 0),
+                "ip_label": c.get("ip_label", "") or "",
+                "user": {"nickname": u.get("nickname", ""), "sec_uid": u.get("sec_uid", ""),
+                         "avatar": av[0] if av else ""},
+                "reply_comment": c.get("reply_comment") or None,
+                "raw": c,
+            })
         return items, bool(j.get("has_more")), j.get("cursor", cursor), {"status": 0}
 
     def get_posts(self, sec, cursor=0, count=20):
@@ -277,6 +303,13 @@ class AuthChannel:
                 out[key] = f"err:{type(e).__name__}"
         return out
 
+    def get_detail_raw(self, aid):
+        """作品详情（登录通道）：guest 拿不到的私密/风控内容走主号"""
+        j = self.web_get("/aweme/v1/web/aweme/detail/", {"aweme_id": aid}, REF_VIDEO(aid))
+        st = j.get("status_code", 0)
+        d = j.get("aweme_detail") or {}
+        return d, {"status": st}
+
 
 class HuoxiaoClient:
     """统一入口：游客通道 + 可选登录通道"""
@@ -284,6 +317,18 @@ class HuoxiaoClient:
     def __init__(self, cookie_str=None, guest_interval=1.5, auth_interval=5.0):
         self.guest = GuestChannel(guest_interval)
         self.auth = AuthChannel(cookie_str, auth_interval) if cookie_str else None
+
+    @staticmethod
+    def _pick_url(obj, prefer_jpeg=True):
+        """从 url_list 挑无水印 jpeg 档，失败回退第一个"""
+        if isinstance(obj, dict):
+            ul = obj.get("url_list") or []
+            if prefer_jpeg:
+                for u in ul:
+                    if ".jpeg" in u and "aweme-images" in u:
+                        return u
+            return ul[0] if ul else ""
+        return obj or ""
 
     @staticmethod
     def _norm(a, detail=False):
@@ -311,10 +356,21 @@ class HuoxiaoClient:
             if not src:
                 src = (vid.get("download_addr") or {}).get("url_list") or (vid.get("play_addr") or {}).get("url_list") or [None]
                 src = src[0] if src else None
+            mu = a.get("music") or {}
+            imgs = a.get("images") or []
             base.update({"width": vid.get("width", 0), "height": vid.get("height", 0),
                          "quality": gear or "play_addr", "play_url": src,
-                         "music": {"title": (a.get("music") or {}).get("title", ""),
-                                   "author": (a.get("music") or {}).get("author", "")}})
+                         "music": {"id": mu.get("id", ""), "title": mu.get("title", ""),
+                                   "author": mu.get("author", ""),
+                                   "cover": HuoxiaoClient._pick_url(mu.get("cover_medium")),
+                                   "cover_large": HuoxiaoClient._pick_url(mu.get("cover_large")),
+                                   "cover_hd": HuoxiaoClient._pick_url(mu.get("cover_hd")),
+                                   "play_url": HuoxiaoClient._pick_url(mu.get("play_url"), prefer_jpeg=False)},
+                         "author_avatar_thumb": HuoxiaoClient._pick_url(au.get("avatar_thumb")),
+                         "author_avatar_medium": HuoxiaoClient._pick_url(au.get("avatar_medium")),
+                         "is_imagepost": bool(imgs),
+                         "images": [HuoxiaoClient._pick_url(i) for i in imgs if isinstance(i, dict) and i.get("url_list")],
+                         "music_cover_all": [HuoxiaoClient._pick_url(mu.get(k), prefer_jpeg=False) for k in ("cover_thumb", "cover_medium", "cover_large", "cover_hd") if mu.get(k)]})
         return base
 
 

@@ -39,3 +39,32 @@ __pycache__/
 _git_*.txt
 _inner_*.txt
 输出数据/favorites_ckpt.json
+
+# === 根目录视频下载样本（媒体，本地保留不入库）===
+/视频下载/
+
+# === 深采/验收看板（生成产物+数据+截图，本地保留不入库）===
+/深采看板/
+
+# === 服务目录一次性排查脚本/日志/备份（本地保留）===
+服务/_*.py
+服务/_*.txt
+服务/_*.jsonl
+服务/_107_backup/
+服务/输出数据/
+
+# === 根目录一次性脚本（本地保留不入库）===
+/fix_*.py
+/test-*.py
+/check_db.py
+/build_ledger.py
+/add_cover_to_api.py
+/rollback_cover.py
+/read_docs.py
+/update_covers.py
+/smb_test.txt
+
+# === 输出数据中间产物（json/日志/备份html，本地保留）===
+输出数据/*.json
+输出数据/*_log.txt
+输出数据/*.bak.html
